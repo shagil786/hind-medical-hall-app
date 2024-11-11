@@ -2,6 +2,10 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { AuthData } from '@/service/auth';
+import { APIResultType } from '@/interfaces/types';
+import { Preferences } from '@capacitor/preferences';
+import { Capacitor } from '@capacitor/core';
 
 interface User {
   id: string;
@@ -60,12 +64,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkLoggedIn();
   }, []);
 
-  const login = async (email: string, password: string) => {
-   
+  const login = async (email: string, password: string, otp?: string) => {
+    try {
+      let loginData: { email?: string; phone?: string; password?: string; otp?: string } = {};
+
+      if (email.includes('@')) {
+        loginData.email = email;
+      } else {
+        loginData.phone = email; // Assuming email can be a phone number
+      }
+
+      if (otp) {
+        loginData.otp = otp;
+      } else {
+        loginData.password = password;
+      }
+
+      const response: APIResultType = await AuthData.userLogin(loginData);
+
+      if (response.status === 200) {
+        const { token, user } = response?.response?.data;
+        if(Capacitor.isNativePlatform()) {
+          Preferences.set({ key: 'token', value: token });
+        } else {
+          localStorage.setItem('token', token);
+        }
+        setUser(user);
+        router.push('/', { scroll: false}); // Redirect to dashboard after successful login
+      } else {
+        throw new Error(response.error?.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
-  const signup = async (name: string, email: string, password: string) => {
-   
+  const signup = async (name: string, email: string, password: string, phone: string) => {
+    try {
+      const response: APIResultType = await AuthData.userRegister({ name, email, password, phone });
+
+      if(response.status === 200) {
+        console.log(response?.response?.data);
+      } else {
+        throw new Error(response.error?.message || 'Signup failed');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
   };
 
   const logout = () => {

@@ -56,7 +56,7 @@ export function AuthModal() {
       <DialogContent className={`w-11/12 rounded-xl p-0 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800`}>
         <div className="flex flex-col h-full">
           <div className="p-6 bg-white dark:bg-gray-800 shadow-md">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-center items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                 {mode === 'login' ? 'Welcome Back' : 'Create Account'}
               </h2>

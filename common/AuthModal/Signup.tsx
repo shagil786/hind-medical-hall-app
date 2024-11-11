@@ -18,7 +18,7 @@ interface SignupProps {
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
@@ -28,13 +28,14 @@ export default function Signup({ step, onNextStep, onPrevStep, onModeChange, onC
   const { signup } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
+    mode: 'onChange',
   });
 
   const [verificationCode, setVerificationCode] = useState<string[]>(Array(4).fill(''));
 
   const onSubmit = async (data: SignupFormData) => {
     try {
-      await signup(data.name, data.email, data.password, data.phone);
+      await signup(data?.name, data?.email, data?.password, data?.phoneNumber);
       onNextStep();
     } catch (error) {
       console.error('Signup failed', error);
@@ -75,11 +76,9 @@ export default function Signup({ step, onNextStep, onPrevStep, onModeChange, onC
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-center">Sign Up</h2>
       {step === 0 && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               {...register('name')}
@@ -88,7 +87,6 @@ export default function Signup({ step, onNextStep, onPrevStep, onModeChange, onC
             {errors.name && <p className="text-red-500">{errors.name.message?.toString()}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -98,17 +96,17 @@ export default function Signup({ step, onNextStep, onPrevStep, onModeChange, onC
             {errors.email && <p className="text-red-500">{errors.email.message?.toString()}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
             <Input
-              id="phone"
-              type="tel"
-              {...register('phone')}
+              id="phoneNumber"
+              type="number"
+              inputMode="numeric"
+              maxLength={10}
+              {...register('phoneNumber')}
               placeholder="Enter your phone number"
             />
-            {errors.phone && <p className="text-red-500">{errors.phone.message}</p>}
+            {errors.phoneNumber && <p className="text-red-500">{errors.phoneNumber.message}</p>}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+          <div className="space-y-2"> 
             <Input
               id="password"
               type="password"
@@ -120,11 +118,6 @@ export default function Signup({ step, onNextStep, onPrevStep, onModeChange, onC
           <Button type="submit" className="w-full">
             Next
           </Button>
-          <div className="text-center">
-            <Button variant="link" onClick={onModeChange}>
-              Already have an account? Login
-            </Button>
-          </div>
         </form>
       )}
       {step === 1 && (
