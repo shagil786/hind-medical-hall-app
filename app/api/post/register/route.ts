@@ -2,36 +2,43 @@ import { API_ENDPOINTS } from "@/server/contants";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    try {
-        const body = await req.json();
-        const { phone, name, ...restBody } = body;
-        
-        const modifiedBody = {
-            ...restBody,
-            phoneNumber: phone,
-            fullName: name,
-        };
+  console.log("register");
+  try {
+    const body = await req.json();
+    const { phone, name, ...restBody } = body;
 
-        const helpers = new Headers();
-        helpers.append('Content-Type', 'application/json');
+    const modifiedBody = {
+      ...restBody,
+      phoneNumber: phone,
+      fullName: name,
+    };
 
-        const url = `${API_ENDPOINTS.API_URL}${API_ENDPOINTS.REGISTER_URL}`;
+    const helpers = new Headers();
+    helpers.append("Content-Type", "application/json");
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: helpers,
-            body: JSON.stringify(modifiedBody)
-        });
+    const url = `${API_ENDPOINTS.API_URL}${API_ENDPOINTS.REGISTER_URL}`;
 
-        console.log(response);
+    const response = await fetch(url, {
+      method: "POST",
+      headers: helpers,
+      body: JSON.stringify(modifiedBody),
+    });
 
-        if(!response.ok) {
-            return NextResponse.json({ message: 'Error fetching data from external API' }, { status: response.status });
-        }
+    console.log(response);
 
-        const data = await response.json();
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        return NextResponse.json({ message: 'Error fetching data from external API' }, { status: 500 });
+    if (!response.ok) {
+      return NextResponse.json(
+        { message: "Error fetching data from external API" },
+        { status: response.status }
+      );
     }
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Error fetching data from external API" },
+      { status: 500 }
+    );
+  }
 }
